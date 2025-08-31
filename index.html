@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>Buy in DZ</title>
+  <style>
+    body { margin: 0; font-family: Tahoma, Arial, sans-serif; direction: rtl; background: #f8f9fa; }
+    header { background: #4CAF50; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    header .logo { display: flex; align-items: center; gap: 10px; }
+    header .logo img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+    header h1 { font-size: 22px; margin: 0; color: white; }
+    nav { display: flex; gap: 20px; }
+    nav a { text-decoration: none; color: white; font-weight: bold; transition: color 0.3s; }
+    nav a:hover { color: #ffeb3b; }
+    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+    .product { background: white; border-radius: 10px; padding: 15px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s; }
+    .product:hover { transform: scale(1.05); }
+    .product img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; }
+    .product p { color: #28a745; margin: 10px 0; font-weight: bold; font-size: 18px; }
+    .product button { background: #28a745; border: none; padding: 10px 15px; border-radius: 8px; color: white; cursor: pointer; transition: background 0.3s; }
+    .product button:hover { background: #218838; }
+    #cart-btn { position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px; background: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    #cart-btn svg { fill: white; width: 28px; height: 28px; }
+    #cart-count { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 14px; font-weight: bold; padding: 3px 7px; border-radius: 50%; display: none; }
+    #cart { display: none; position: fixed; bottom: 100px; left: 20px; width: 300px; max-height: 400px; overflow-y: auto; background: #fff; border: 2px solid #4CAF50; border-radius: 15px; padding: 15px; box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+    #cart h2 { margin: 0 0 10px; }
+    #cart ul { list-style: none; padding: 0; margin: 0; }
+    #cart ul li { margin: 8px 0; display: flex; justify-content: space-between; background: #f1f1f1; padding: 8px; border-radius: 8px; }
+    .remove-btn { background: red; padding: 5px 10px; border: none; border-radius: 5px; color: white; cursor: pointer; transition: background 0.3s; }
+    .remove-btn:hover { background: darkred; }
+    #checkout-btn { margin-top: 10px; background: #28a745; border: none; padding: 10px; border-radius: 8px; color: white; font-size: 16px; width: 100%; cursor: pointer; transition: background 0.3s; }
+    #checkout-btn:hover { background: #218838; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="شعار المتجر">
+    <h1>Buy in DZ</h1>
+  </div>
+  <nav>
+    <a href="#">الرئيسية</a>
+    <a href="#">المتجر</a>
+    <a href="#">اتصل بنا</a>
+  </nav>
+</header>
+
+<div class="products" id="product-list">
+  <div class="product">
+    <img src="watch1.jpg" alt="ساعة يد كلاسيكية">
+    <p>3500 دج</p>
+    <button onclick="addToCart('ساعة يد', 3500)">أضف إلى السلة</button>
+  </div>
+  <div class="product">
+    <img src="bracelet1.jpg" alt="سوار جلد">
+    <p>3000 دج</p>
+    <button onclick="addToCart('سوار جلد', 3000)">أضف إلى السلة</button>
+  </div>
+  <div class="product">
+    <img src="bracelet2.jpg" alt="سوار فضة">
+    <p>2500 دج</p>
+    <button onclick="addToCart('سوار فضة', 2500)">أضف إلى السلة</button>
+  </div>
+</div>
+
+<div id="cart-btn" onclick="toggleCart()">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14h9.69c.75 0 1.41-.41 1.75-1.03l3.58-6.49a1 1 0 0 0-.88-1.48H6.21l-.94-2H1v2h3l3.6 7.59-1.35 2.44C5.52 16.37 6.48 18 8 18h12v-2H8l1.16-2z"/>
+  </svg>
+  <span id="cart-count">0</span>
+</div>
+
+<div id="cart">
+  <h2>🛒 السلة</h2>
+  <ul id="cart-items"></ul>
+  <p><strong>المجموع: <span id="total">0</span> دج</strong></p>
+  <button id="checkout-btn" onclick="goToCheckout()">شراء</button>
+</div>
+
+<script>
+let total = 0;
+let count = 0;
+let cartProducts = [];
+
+function addToCart(product, price) {
+  const cartItems = document.getElementById("cart-items");
+  const li = document.createElement("li");
+  li.textContent = product + " - " + price + " دج";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "حذف";
+  removeBtn.classList.add("remove-btn");
+  removeBtn.onclick = function() {
+    cartItems.removeChild(li);
+    total -= price;
+    count--;
+    cartProducts = cartProducts.filter(p => p.name !== product || p.price !== price);
+    updateCartUI();
+  };
+
+  li.appendChild(removeBtn);
+  cartItems.appendChild(li);
+
+  total += price;
+  count++;
+  cartProducts.push({name: product, price: price});
+  updateCartUI();
+}
+
+function updateCartUI() {
+  document.getElementById("total").textContent = total;
+  const cartCount = document.getElementById("cart-count");
+  if (count > 0) {
+    cartCount.style.display = "block";
+    cartCount.textContent = count;
+  } else {
+    cartCount.style.display = "none";
+  }
+}
+
+function toggleCart() {
+  const cart = document.getElementById("cart");
+  cart.style.display = (cart.style.display === "block") ? "none" : "block";
+}
+
+function goToCheckout() {
+  localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+  window.location.href = "checkout.html";
+}
+</script>
+
+</body>
+</html>
